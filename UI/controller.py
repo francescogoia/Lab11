@@ -37,7 +37,7 @@ class Controller:
     def fillDDProduct(self):
         prodotti = self._model.get_prodotti()
         for p in prodotti:
-            self._view._ddnode.options.append(ft.dropdown.Option(data=p, text=p.Product, on_click=self.readDDProduct))
+            self._view._ddnode.options.append(ft.dropdown.Option(data=p, text=p.Product_number, on_click=self.readDDProduct))
 
 
 
@@ -50,4 +50,3 @@ class Controller:
             self._choice_prodotto = None
         else:
             self._choice_prodotto = e.control.data
-            print(self._choice_prodotto)

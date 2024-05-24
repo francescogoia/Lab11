@@ -36,7 +36,7 @@ class DAO():
 
         cursor.close()
         conn.close()
-        print(result)
+
         return result
 
 
