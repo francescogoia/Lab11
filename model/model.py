@@ -7,7 +7,8 @@ import networkx as NX
 
 class Model:
     def __init__(self):
-        self._sol_best = None
+        self._memo = {}
+        self._miglior_percorso = []
         self._soluzioni = []
         self._colori = DAO.get_colors()
         self._grafo = NX.Graph()
@@ -31,11 +32,14 @@ class Model:
                         self._grafo.add_edge(v1, v2, weight=peso[0])
 
     def cerca_percorso(self, partenza):
-        self.ricorsione(partenza, [], 0, [])
-        for i in self._soluzioni:
+        self._miglior_percorso = []
+        self._memo = {}
+        self.ricorsione(partenza, [], 0)
+        lunghezza_best = len(self._miglior_percorso)
+        print(f"Percorso più lungo: {self._miglior_percorso},\nLunghezza: {lunghezza_best}")
+        for i in self._miglior_percorso:
             print(i)
-        self.cerca_best_sol()
-        print(self._sol_best)
+        return lunghezza_best
 
 
 
@@ -47,30 +51,50 @@ class Model:
     def get_prodotti(self):
         return self._grafo.nodes
 
-    def ricorsione(self, nodo, parziale, peso_max, termina):
+    """def ricorsione(self, nodo, parziale, peso_max, termina):
         if termina:
             self._soluzioni.append((copy.deepcopy(parziale), len(parziale)))
         else:
-            vicini = nx.neighbors(self._grafo, nodo)
+            vicini = self._grafo.neighbors(nodo)
             for n in vicini:
                 peso_arco = self._grafo[nodo][n]["weight"]
-                if peso_arco >= peso_max:
-                    if self.filtro(nodo, n, parziale):
+                if self.filtro(nodo, n, parziale)and peso_arco >= peso_max:
                         peso_max = peso_arco
                         parziale.append((nodo, n, peso_arco))
                         self.ricorsione(n, parziale, peso_max, False)
                         parziale.pop()
-                    else:           ## parziale contiene già i nodi passati
-                        self.ricorsione(n, parziale, peso_max, True)
+                else:           ## parziale contiene già i nodi passati
+                  self.ricorsione(n, parziale, peso_max, True"""
+
+    def ricorsione(self, nodo, parziale, peso_max):
+        # controllo la tabella di memorizzazione
+        stato = (nodo, peso_max, tuple(parziale))
+        if stato in self._memo:
+            return self._memo[stato]
+
+        # Se il percorso attuale è più lungo del miglior percorso trovato, aggiorno il miglior percorso
+        if len(parziale) > len(self._miglior_percorso):
+            self._miglior_percorso = copy.deepcopy(parziale)
+
+        vicini = self._grafo.neighbors(nodo)
+        for n in vicini:
+            peso_arco = self._grafo[nodo][n]["weight"]
+            if self.filtro(nodo, n, parziale) and peso_arco >= peso_max:            ## quando non supero più il filtro e ho finito i vicini esco
+                parziale.append((nodo, n, peso_arco))
+                self.ricorsione(n, parziale, peso_arco)             ## passo alla nuova ricorsione peso_arco (che diventa così peso_max)
+                parziale.pop()
+
+        # memorizzo il risultato per questo stato
+        self._memo[stato] = self._miglior_percorso
+        return self._miglior_percorso
+
 
     def filtro(self, nodo, n, parziale):
         for arco in parziale:
-            if arco[ :-1] == (nodo, n) or arco[ :-1] == (n, nodo):              ## se i nodi dell'arco sono quelli passati return True (se parziale contiene già i nodi passati --> False)
+            if arco[ :2] == (nodo, n) or arco[ :2] == (n, nodo):              ## se i nodi dell'arco sono quelli passati return True (se parziale contiene già i nodi passati --> False)
                 return False
         return True
 
-    def cerca_best_sol(self):
-        self._sol_best =  max(self._soluzioni, key=lambda x : x[1])
 
 
 

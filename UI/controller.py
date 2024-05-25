@@ -43,7 +43,9 @@ class Controller:
 
     def handle_search(self, e):
         partenza = self._choice_prodotto
-        self._model.cerca_percorso(partenza)
+        l_best = self._model.cerca_percorso(partenza)
+        self._view.txtOut2.controls.append(ft.Text(f"Numero archi percorso più lungo: {l_best}"))
+        self._view.update_page()
 
     def readDDProduct(self, e):
         if e.control.data is None:
