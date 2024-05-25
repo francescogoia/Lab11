@@ -33,12 +33,12 @@ class Model:
 
     def cerca_percorso(self, partenza):
         self._miglior_percorso = []
-        self._memo = {}
+        self._best_peso_per_len = [1e16 for i in range(len(self._grafo.edges))]
         self.ricorsione(partenza, [], 0)
         lunghezza_best = len(self._miglior_percorso)
         print(f"Percorso più lungo: {self._miglior_percorso},\nLunghezza: {lunghezza_best}")
-        for i in self._miglior_percorso:
-            print(i)
+        """for i in self._miglior_percorso:
+            print(i)"""
         return lunghezza_best
 
 
@@ -67,10 +67,8 @@ class Model:
                   self.ricorsione(n, parziale, peso_max, True"""
 
     def ricorsione(self, nodo, parziale, peso_max):
-        # controllo la tabella di memorizzazione
-        stato = (nodo, peso_max, tuple(parziale))
-        if stato in self._memo:
-            return self._memo[stato]
+        if self._best_peso_per_len[len(parziale)] < peso_max:
+            return
 
         # Se il percorso attuale è più lungo del miglior percorso trovato, aggiorno il miglior percorso
         if len(parziale) > len(self._miglior_percorso):
@@ -80,13 +78,13 @@ class Model:
         for n in vicini:
             peso_arco = self._grafo[nodo][n]["weight"]
             if self.filtro(nodo, n, parziale) and peso_arco >= peso_max:            ## quando non supero più il filtro e ho finito i vicini esco
+                if peso_arco < self._best_peso_per_len[len(parziale)]:
+                    self._best_peso_per_len[len(parziale)] = peso_arco
                 parziale.append((nodo, n, peso_arco))
                 self.ricorsione(n, parziale, peso_arco)             ## passo alla nuova ricorsione peso_arco (che diventa così peso_max)
                 parziale.pop()
 
-        # memorizzo il risultato per questo stato
-        self._memo[stato] = self._miglior_percorso
-        return self._miglior_percorso
+
 
 
     def filtro(self, nodo, n, parziale):
