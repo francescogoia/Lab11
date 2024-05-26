@@ -13,6 +13,8 @@ class Product:
 
     def __str__(self):
         return f"{self.Product_number}-{self.Product_line}-{self.Product_type}-{self.Product}-{self.Product_brand}-{self.Product_color}-{self.Unit_cost}-{self.Unit_price}"
+    def __repr__(self):
+        return f"{self.Product_number}"
 
     def __hash__(self):
         return hash(self.Product_number)
